@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react';
 
+// marcelo: Define a URL da API dinamicamente (pega a variável de ambiente da Vercel ou cai para o localhost)
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 function App() {
-  // marcelo: Estados de controle de navegação (login vs cadastro)
+  // marcelo: Controla se a tela atual é o Login (false) ou o Cadastro (true)
   const [isRegistering, setIsRegistering] = useState(false);
 
-  // marcelo: Estados do formulário de autenticação e cadastro
+  // marcelo: Estados para captação dos dados de formulário (removido setRole não utilizado)
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('Analista SOC');
+  const [role] = useState('Analista SOC');
   
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   
-  // marcelo: Estados de monitoramento do SOC e Governança
+  // marcelo: Estados do SOC e Governança
   const [alerts, setAlerts] = useState<Array<{ nivel: string; mensagem: string }>>([]);
   const [systemHealth, setSystemHealth] = useState({ cpu_usage: '14%', ram_usage: '48%', status: 'healthy' });
   const [simulationStatus, setSimulationStatus] = useState<string | null>(null);
@@ -24,14 +27,14 @@ function App() {
   const [capacityMetrics, setCapacityMetrics] = useState<any[]>([]);
   const [complianceStatus, setComplianceStatus] = useState<string | null>(null);
 
-  // marcelo: Função para realizar o login na API
+  // marcelo: Função de Autenticação utilizando o API_URL dinâmico
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/login', {
+      const response = await fetch(`${API_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -49,14 +52,14 @@ function App() {
     }
   };
 
-  // marcelo: Função para registrar um novo operador no sistema
+  // marcelo: Função de Registro de Novo Operador utilizando o API_URL dinâmico
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/register', {
+      const response = await fetch(`${API_URL}/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password, email, role }),
@@ -69,23 +72,23 @@ function App() {
       }
 
       setSuccessMessage(data.message);
-      setIsRegistering(false); // Retorna para a tela de login após cadastrar com sucesso
+      setIsRegistering(false); // Retorna para o login após o cadastro
       setPassword('');
     } catch (err: any) {
       setError(err.message || 'Erro de conexão com o servidor.');
     }
   };
 
-  // marcelo: Hook de carregamento de dados e polling do Live Feed pós-login
+  // marcelo: Carregamento de dados pós-login utilizando o API_URL dinâmico
   useEffect(() => {
     if (!token) return;
 
-    fetch('http://localhost:8000/api/health')
+    fetch(`${API_URL}/api/health`)
       .then(res => res.json())
       .then(data => setSystemHealth(data))
       .catch(err => console.error("Erro ao buscar health:", err));
 
-    fetch('http://localhost:8000/api/audit/identities')
+    fetch(`${API_URL}/api/audit/identities`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'sucesso') {
@@ -95,7 +98,7 @@ function App() {
       })
       .catch(err => console.error("Erro ao buscar identidades:", err));
 
-    fetch('http://localhost:8000/api/capacity/prediction')
+    fetch(`${API_URL}/api/capacity/prediction`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'sucesso') {
@@ -106,7 +109,7 @@ function App() {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/alerts/poll');
+        const res = await fetch(`${API_URL}/api/alerts/poll`);
         const newAlert = await res.json();
         
         if (newAlert) {
@@ -128,7 +131,7 @@ function App() {
   const triggerAttack = async (scenario: string) => {
     setSimulationStatus(`Injetando cenário: ${scenario}...`);
     try {
-      const res = await fetch('http://localhost:8000/api/simulate-attack', {
+      const res = await fetch(`${API_URL}/api/simulate-attack`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scenario }),
@@ -147,7 +150,7 @@ function App() {
 
   const handleRevokeInactive = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/audit/revoke-inactive', {
+      const res = await fetch(`${API_URL}/api/audit/revoke-inactive`, {
         method: 'POST',
       });
       const data = await res.json();
@@ -159,7 +162,7 @@ function App() {
     }
   };
 
-  // marcelo: Renderização do Dashboard Cyberpunk principal pós-login
+  // marcelo: Dashboard Principal do SIEM
   if (token) {
     return (
       <div style={{
@@ -393,7 +396,7 @@ function App() {
                         <button
                           onClick={async () => {
                             try {
-                              const res = await fetch('http://localhost:8000/api/soar/mitigate', {
+                              const res = await fetch(`${API_URL}/api/soar/mitigate`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ action: 'block_user', target: username })
@@ -434,7 +437,7 @@ function App() {
     );
   }
 
-  // marcelo: Tela de Autenticação / Cadastro dinâmico
+  // marcelo: Tela de Autenticação / Cadastro
   return (
     <div style={{
       position: 'fixed',
@@ -478,7 +481,6 @@ function App() {
           {isRegistering ? 'Specter Platform [Cadastro]' : 'Specter Platform [Auth]'}
         </h1>
 
-        {/* marcelo: Formulário dinâmico que alterna entre Login e Registro */}
         <form onSubmit={isRegistering ? handleRegister : handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <label style={{ display: 'block', fontSize: '14px', marginBottom: '8px', color: '#00ffff', fontWeight: 'bold', textTransform: 'uppercase' }}>
@@ -607,7 +609,6 @@ function App() {
             {isRegistering ? 'Cadastrar Novo Operador' : 'Estabelecer Conexão'}
           </button>
 
-          {/* marcelo: Botão alternador entre as telas de Login e Cadastro */}
           <button
             type="button"
             onClick={() => {
