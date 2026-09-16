@@ -1,5 +1,6 @@
 fastapi
 uvicorn
+<<<<<<< HEAD
 sqlalchemy
 psycopg2-binary
 pydantic
@@ -8,3 +9,6 @@ passlib
 python-jose
 PyJWT
 python-dotenv
+=======
+pydantic
+pyjwt
