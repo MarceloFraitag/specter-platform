@@ -63,4 +63,3 @@ specter-platform/
 ├── specter-frontend/    # Painel React + TypeScript
 ├── specter-agent-go/    # Agente coletor de telemetria
 └── docker-compose.yml   # Orquestração dos containers
-\`\`\`
