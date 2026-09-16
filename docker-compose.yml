@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  # Serviço 1: O Backend FastAPI em Python
+  specter-backend:
+    build: .
+    container_name: specter_backend_container
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+    restart: always
+
+  # Serviço 2: O Agente Coletor em Go
+  specter-agent:
+    build: ./specter-agent-go
+    container_name: specter_agent_container
+    depends_on:
+      - specter-backend
+    restart: always
