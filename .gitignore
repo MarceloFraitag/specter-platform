@@ -1,0 +1,14 @@
+# Python / FastAPI
+venv/
+__pycache__/
+*.pyc
+.env
+
+# Node / React
+node_modules/
+dist/
+
+# Go binaries
+*.exe
+*.o
+*.test
