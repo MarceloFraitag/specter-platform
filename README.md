@@ -23,33 +23,44 @@ Plataforma de cibersegurança para gerenciamento de incidentes (SIEM/SOAR), com 
 
 ## Como rodar
 
-### Backend
-```bash
+### Docker Compose (recomendado)
+
+\`\`\`bash
+docker-compose up --build
+\`\`\`
+
+Sobe backend, frontend, agente e banco juntos. Configure as variáveis de ambiente (conexão com o banco e segredo do JWT) antes de subir os containers.
+
+### Manual
+
+**Backend**
+\`\`\`bash
 cd specter-backend
 pip install -r requirements.txt
 uvicorn main:app --reload
-```
+\`\`\`
 
-### Frontend
-```bash
+**Frontend**
+\`\`\`bash
 cd specter-frontend
 npm install
 npm run dev
-```
+\`\`\`
 
-### Agente (Go)
-```bash
+**Agente (Go)**
+\`\`\`bash
 cd specter-agent-go
 go run main.go
-```
+\`\`\`
 
 Configure as variáveis de ambiente (conexão com o banco e segredo do JWT) antes de rodar o backend.
 
 ## Estrutura
 
-```
+\`\`\`
 specter-platform/
 ├── specter-backend/     # API FastAPI
 ├── specter-frontend/    # Painel React + TypeScript
-└── specter-agent-go/    # Agente coletor de telemetria
-```
+├── specter-agent-go/    # Agente coletor de telemetria
+└── docker-compose.yml   # Orquestração dos containers
+\`\`\`
